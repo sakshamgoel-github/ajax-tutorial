@@ -1,14 +1,15 @@
 <h1>Hello World</h1>
-<select name="postId" id="postId" onchange="getComment(this.value)">
-    <option value="">Select Post id</option>
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
+<select name="itemId" id="itemId" onchange="getSrv(this.value)">
+    <option value="">Select Item id</option>
+    <option value="100">Item 1</option>
+    <option value="200">Item 2</option>
+    <option value="300">Item 3</option>
+    <option value="400">Item 4</option>
 </select>
-<select name="commentId" id="commentId" onchange="getEmail(this.value)">
-    <option value="">Select Comment Id</option>
+<select name="srvId" id="srvId" onchange="getQuantity(this.value)">
+    <option value="">Select Srv</option>
 </select>
-<input type="text" readonly id="email">
+<input type="text" readonly id="quantity">
 
 <!-- Loader Element -->
 <div id="loader" style="display: none;">Loading...</div>
@@ -19,60 +20,63 @@
         loader.style.display = show ? 'block' : 'none';
     }
 
-    function getComment(id) {
+    function getSrv(id) {
         if (id) {
+            const srvSelect = $('#srvId')[0].selectize;
+            srvSelect.clearOptions(); // Clear previous options
             toggleLoader(true); // Show loader
-
-            const commentSelect = $('#commentId')[0].selectize;
-            commentSelect.clearOptions(); // Clear previous options
-
             jQuery.ajax({
-                url: `comment?postId=${id}`,
+                url: `srv?itemId=${id}`,
                 type: "GET",
                 success: (res) => {
                     toggleLoader(false); // Hide loader
 
                     // Populate with new options
-                    res.forEach(comment => {
-                        commentSelect.addOption({value: comment.id, text: comment.id});
+                    res.forEach(srv => {
+                        srvSelect.addOption({value: srv.id, text: srv.id});
                     });
                 },
                 error: (err) => {
                     toggleLoader(false); // Hide loader
-                    console.error('Error fetching comments:', err);
+                    console.error('Error fetching srv:', err);
                 }
             });
         } else {
-            console.log('Please select a valid post ID.');
+            console.log('Please select a valid item ID.');
         }
     }
 
-    function getEmail(id) {
-        if (id) {
+    function getQuantity(srvId) {
+        const itemId = document.getElementById('itemId').value;
+        if (srvId && itemId) {
             toggleLoader(true); // Show loader
             jQuery.ajax({
-                url: `email?commentId=${id}`,
+                url: `quantity?srvId=${srvId}&itemId=${itemId}`,
                 type: "GET",
                 success: (res) => {
                     toggleLoader(false); // Hide loader
-                    const inputEle = document.getElementById('email');
-                    inputEle.value = res.email;
+                    const inputEle = document.getElementById('quantity');
+                    if (res && res.quantity !== undefined) {
+                        inputEle.value = res.quantity;
+                    } else {
+                        location.reload();
+                    }
                 },
                 error: (err) => {
                     toggleLoader(false); // Hide loader
-                    console.error("Error fetching email", err);
+                    console.error("Error fetching quantity", err);
                 }
             });
         } else {
-            console.error("Please select a valid comment");
+            console.error("Please select both item and srv.");
         }
     }
 
     $(document).ready(function() {
-        $('#postId').selectize({
+        $('#itemId').selectize({
             sortField: 'text'
         });
-        $('#commentId').selectize({
+        $('#srvId').selectize({
             sortField: 'text'
         });
     });

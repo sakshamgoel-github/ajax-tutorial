@@ -1,8 +1,11 @@
 <?php
+
 namespace app\controllers;
 
+use app\models\Srv;
 use Yii;
 use yii\web\Controller;
+use yii\web\Response;
 
 class PostController extends Controller
 {
@@ -11,28 +14,29 @@ class PostController extends Controller
         return $this->render("index.php");
     }
 
-    public function actionComment($postId)
+    public function actionSrv($itemId)
     {
-        // URL to fetch comments
-        $url = "https://jsonplaceholder.typicode.com/posts/{$postId}/comments";
+        // Use parameterized query to avoid SQL injection
+        $response = Srv::find()->where(['itemId' => $itemId])->all();
 
-        // Fetch comments using file_get_contents
-        $response = file_get_contents($url);
+        // Set the response format to JSON
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
         // Return the response as JSON
-        return $this->asJson(json_decode($response, true));
+        return $response;
     }
 
-    public function actionEmail($commentId)
+    public function actionQuantity($srvId, $itemId)
     {
-        // URL to fetch comments
-        $url = "https://jsonplaceholder.typicode.com/comments/{$commentId}/";
+        // Use parameterized query to avoid SQL injection
+        $response = Srv::find()
+            ->where(['id' => $srvId, 'itemId' => $itemId])
+            ->one();
 
-        // Fetch comments using file_get_contents
-        $response = file_get_contents($url);
+        // Set the response format to JSON
+        Yii::$app->response->format = Response::FORMAT_JSON;
 
         // Return the response as JSON
-        return $this->asJson(json_decode($response, true));
+        return $response;
     }
-
 }
